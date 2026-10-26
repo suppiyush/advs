@@ -14,11 +14,12 @@ const NAV = {
     { to: '/notifications', label: 'Notifications' },
   ],
   ADMINISTRATOR: [
-    { to: '/admin', label: 'Users & Roles', end: true },
+    { to: '/admin', label: 'Dashboard', end: true },
+    { to: '/admin/users', label: 'Users & Roles' },
     { to: '/admin/categories', label: 'Categories & Checklists' },
     { to: '/cases', label: 'Verification' },
-    { label: 'Reports & Dashboards', soon: true },
-    { label: 'System Configuration', soon: true },
+    { to: '/admin/reports', label: 'Reports' },
+    { to: '/admin/settings', label: 'System Configuration' },
   ],
 };
 

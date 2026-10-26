@@ -19,7 +19,7 @@ administrators manage checklists, users and reports. Requirements and UML models
 | 3 | Document upload, replace/resubmit, file versions, access-checked downloads | Done |
 | 4 | Pending-cases dashboard, document review, decisions with remarks, corrections | Done |
 | 5 | In-app notifications (status changes, remarks, missing documents, new submissions) | Done |
-| 6 | Administration & reports | — |
+| 6 | Users & roles, system settings, audit log, progress dashboard, reports | Done |
 
 ## Setup
 

@@ -9,7 +9,11 @@ import UploadDocument from './pages/applicant/UploadDocument.jsx';
 import PendingCases from './pages/verifier/PendingCases.jsx';
 import ReviewDocument from './pages/verifier/ReviewDocument.jsx';
 import ApplicationView from './pages/verifier/ApplicationView.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import UsersPage from './pages/admin/UsersPage.jsx';
+import UserDetailPage from './pages/admin/UserDetailPage.jsx';
+import ReportsPage from './pages/admin/ReportsPage.jsx';
+import SystemPage from './pages/admin/SystemPage.jsx';
 import CategoriesPage from './pages/admin/CategoriesPage.jsx';
 import CategoryDetailPage from './pages/admin/CategoryDetailPage.jsx';
 import Forbidden from './pages/shared/Forbidden.jsx';
@@ -48,7 +52,11 @@ export default function App() {
 
       <Route element={<ProtectedRoute roles={['ADMINISTRATOR']} />}>
         <Route element={<Layout />}>
-          <Route path="/admin" element={<UsersPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/users/:id" element={<UserDetailPage />} />
+          <Route path="/admin/reports" element={<ReportsPage />} />
+          <Route path="/admin/settings" element={<SystemPage />} />
           <Route path="/admin/categories" element={<CategoriesPage />} />
           <Route path="/admin/categories/:id" element={<CategoryDetailPage />} />
         </Route>

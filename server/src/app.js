@@ -16,7 +16,8 @@ import applicationRoutes from './modules/documents/application.routes.js';
 import documentRoutes from './modules/documents/document.routes.js';
 import { decisionRoutes, verificationRoutes } from './modules/verification/verification.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
-import adminUserRoutes from './modules/admin/user.routes.js';
+import { adminSystemRoutes, adminUserRoutes } from './modules/admin/user.routes.js';
+import reportRoutes from './modules/reports/report.routes.js';
 
 export function createApp() {
   const app = express();
@@ -43,6 +44,8 @@ export function createApp() {
   app.use('/api/admin/users', adminUserRoutes);
   app.use('/api/admin/categories', adminCategoryRoutes);
   app.use('/api/admin/checklist-items', adminChecklistItemRoutes);
+  app.use('/api/admin', adminSystemRoutes);
+  app.use('/api/reports', reportRoutes);
 
   app.use('/api', notFoundHandler);
   app.use(errorHandler);

@@ -17,6 +17,9 @@ export const pool = new pg.Pool({
   idleTimeoutMillis: 60 * 1000,
   // Give up on a connection attempt (e.g. while Neon wakes up) instead of hanging the request.
   connectionTimeoutMillis: 15 * 1000,
+  // A query sent on a connection that died silently would otherwise wait for the OS TCP timeout
+  // (many minutes); fail it instead so the request returns an error.
+  query_timeout: 30 * 1000,
   keepAlive: true,
 });
 

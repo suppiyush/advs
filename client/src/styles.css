@@ -1038,6 +1038,214 @@ code {
   }
 }
 
+/* Admin dashboard */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-grid .card {
+  margin-bottom: 0;
+}
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.two-column > .card,
+.two-column > div > .card {
+  margin-bottom: 1rem;
+}
+
+.status-bar {
+  margin: 0.5rem 0 0;
+}
+
+.status-bar-track {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+}
+
+.status-bar-track.empty {
+  background: var(--grey-bg);
+  border-radius: 4px;
+}
+
+.status-bar-segment {
+  min-width: 4px;
+  border-radius: 2px;
+}
+
+.status-bar-segment:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.status-bar-segment:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.status-bar-segment:hover {
+  opacity: 0.8;
+}
+
+.tone-green { background: #2e9e57; }
+.tone-blue { background: #3b73d1; }
+.tone-amber { background: #d99a1e; }
+.tone-red { background: #d64437; }
+.tone-grey { background: #a0a8b5; }
+
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.status-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.status-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table td.bar-cell {
+  min-width: 220px;
+}
+
+.table tfoot th {
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+  background: #fafbfc;
+  color: var(--text);
+  text-transform: none;
+  font-size: 0.9rem;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.audit-details {
+  overflow-wrap: anywhere;
+  min-width: 180px;
+}
+
+.table-compact th,
+.table-compact td {
+  padding: 0.55rem 0.6rem;
+}
+
+.table-compact th {
+  white-space: nowrap;
+}
+
+.table .group-header th {
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.table .group-header th:first-child {
+  text-align: left;
+  vertical-align: bottom;
+}
+
+.table .group-start {
+  border-left: 1px solid var(--border);
+}
+
+/* Reports, settings, audit log */
+.date-range,
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.audit-filters {
+  padding: 0 1rem 0.75rem;
+}
+
+.date-range input,
+.audit-filters input,
+.audit-filters select,
+.filter-select {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.filter-select {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fieldset legend {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.inline-checks {
+  display: flex;
+  gap: 1.25rem;
+  padding-top: 0.4rem;
+}
+
+.inline-checks .checkbox {
+  padding-bottom: 0;
+}
+
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
 .missing-card {
   border-left: 4px solid var(--amber-fg);
 }
