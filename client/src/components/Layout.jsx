@@ -1,16 +1,17 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { ROLE_LABEL, useAuth } from '../context/AuthContext.jsx';
+import NotificationBell from './NotificationBell.jsx';
 
 // One consistent layout for every role (NFR-008); only the side navigation differs.
 // Items marked "soon" are built in later increments.
 const NAV = {
   APPLICANT: [
-    { to: '/applicant', label: 'My Application', end: true },
-    { label: 'Notifications', soon: true },
+    { to: '/applicant', label: 'My Application' },
+    { to: '/notifications', label: 'Notifications' },
   ],
   VERIFIER: [
     { to: '/cases', label: 'Pending Cases' },
-    { label: 'Notifications', soon: true },
+    { to: '/notifications', label: 'Notifications' },
   ],
   ADMINISTRATOR: [
     { to: '/admin', label: 'Users & Roles', end: true },
@@ -38,6 +39,7 @@ export default function Layout() {
           <span className="brand-name">Admission Document Verification System</span>
         </div>
         <div className="topbar-user">
+          <NotificationBell />
           <div className="user-meta">
             <span className="user-name">{user.name}</span>
             <span className="user-role">{ROLE_LABEL[user.role]}</span>

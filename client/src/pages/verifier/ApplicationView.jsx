@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getApiError } from '../../api/client.js';
+import { sendMissingReminder } from '../../api/notifications.js';
 import { fetchStaffApplication } from '../../api/verification.js';
 import StatusBadge from '../../components/StatusBadge.jsx';
 
@@ -9,6 +10,21 @@ export default function ApplicationView() {
   const { id } = useParams();
   const [application, setApplication] = useState(null);
   const [error, setError] = useState(null);
+  const [reminder, setReminder] = useState({ sending: false, message: null, error: null });
+
+  async function remind() {
+    setReminder({ sending: true, message: null, error: null });
+    try {
+      const result = await sendMissingReminder(application.id);
+      setReminder({
+        sending: false,
+        message: `Reminder sent to ${result.applicantName} about ${result.missing} missing document${result.missing === 1 ? '' : 's'}.`,
+        error: null,
+      });
+    } catch (err) {
+      setReminder({ sending: false, message: null, error: getApiError(err).message });
+    }
+  }
 
   useEffect(() => {
     fetchStaffApplication(id)
@@ -59,9 +75,21 @@ export default function ApplicationView() {
         </div>
       </div>
 
+      {reminder.message && (
+        <div className="alert alert-success" role="status">
+          {reminder.message}
+        </div>
+      )}
+      {reminder.error && <div className="alert alert-error">{reminder.error}</div>}
+
       {application.missing.length > 0 && (
         <div className="card missing-card">
-          <h2>Missing documents ({application.missing.length})</h2>
+          <div className="card-title-row">
+            <h2>Missing documents ({application.missing.length})</h2>
+            <button type="button" className="btn btn-secondary btn-small" onClick={remind} disabled={reminder.sending}>
+              {reminder.sending ? 'Sending…' : 'Send reminder'}
+            </button>
+          </div>
           <ul className="missing-list">
             {application.missing.map((m) => (
               <li key={m.id}>

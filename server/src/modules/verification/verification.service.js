@@ -1,10 +1,11 @@
 // VerificationService (class diagram): UC-008 View Pending Cases, UC-009 Verify Document,
 // UC-010 Reject Document, UC-011 Add Remarks; FR-016-020, BR-002-004.
 import { query, withTransaction } from '../../config/db.js';
-import { ROLES } from '../../config/constants.js';
+import { NOTIFICATION_TYPE, ROLES } from '../../config/constants.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { recordAudit } from '../../services/audit.js';
 import { getMissingDocuments, recomputeApplicationStatus } from '../documents/document.service.js';
+import { messages, sendNotification } from '../notifications/notification.service.js';
 
 /**
  * Which categories a staff member works on: verifiers only their assigned category (§11.2),
@@ -155,7 +156,7 @@ export async function getApplicationForStaff(user, applicationId) {
 
 async function lockDocumentInScope(client, user, documentId) {
   const { rows } = await client.query(
-    `SELECT d.*, a.category_id, ci.document_type
+    `SELECT d.*, a.category_id, a.applicant_id, ci.document_type
        FROM documents d
        JOIN applications a ON a.id = d.application_id
        JOIN checklist_items ci ON ci.id = d.checklist_item_id
@@ -216,6 +217,22 @@ export async function recordDecision(user, documentId, { status, remarks, versio
       },
       client,
     );
+    // BR-009 / FR-024: Verification.generate() -> the applicant hears about the outcome. A rejection
+    // asks for a corrected copy (FR-026); a remark on a pending document is REMARK_ADDED.
+    await sendNotification(
+      {
+        recipientIds: doc.applicant_id,
+        type: status === 'PENDING' ? NOTIFICATION_TYPE.REMARK_ADDED : NOTIFICATION_TYPE.STATUS_UPDATE,
+        message:
+          status === 'VERIFIED'
+            ? messages.verified(doc.document_type)
+            : status === 'REJECTED'
+              ? messages.rejected(doc.document_type, remarks)
+              : messages.remark(doc.document_type, remarks),
+        link: `/applicant/documents/${doc.checklist_item_id}`,
+      },
+      client,
+    );
     return { documentId: updated.id, documentType: doc.document_type, status: updated.status, remarks: updated.remarks };
   });
 }
@@ -253,6 +270,45 @@ export async function correctDecision(user, documentId, { status, reason }) {
       },
       client,
     );
+    await sendNotification(
+      {
+        recipientIds: doc.applicant_id,
+        type: NOTIFICATION_TYPE.STATUS_UPDATE,
+        message: messages.corrected(doc.document_type, status, reason),
+        link: `/applicant/documents/${doc.checklist_item_id}`,
+      },
+      client,
+    );
     return { documentId: doc.id, documentType: doc.document_type, status };
+  });
+}
+
+/** FR-025: staff remind an applicant of the documents still missing from their application. */
+export async function remindMissingDocuments(user, applicationId) {
+  const application = await getApplicationForStaff(user, applicationId);
+  if (application.missing.length === 0) {
+    throw new AppError(400, 'NOTHING_MISSING', 'This application has no missing documents.');
+  }
+  return withTransaction(async (client) => {
+    await sendNotification(
+      {
+        recipientIds: application.applicant.id,
+        type: NOTIFICATION_TYPE.MISSING_DOCUMENT,
+        message: messages.reminder(application.missing.map((m) => m.documentType)),
+        link: '/applicant',
+      },
+      client,
+    );
+    await recordAudit(
+      {
+        actorId: user.id,
+        action: 'REMINDER_SENT',
+        entityType: 'application',
+        entityId: application.id,
+        details: { missing: application.missing.map((m) => m.documentType) },
+      },
+      client,
+    );
+    return { applicantName: application.applicant.name, missing: application.missing.length };
   });
 }

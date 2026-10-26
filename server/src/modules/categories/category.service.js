@@ -1,9 +1,11 @@
 // Category and checklist management (FR-007-010, FR-033, BR-008). Only administrators reach the
 // mutating functions; every change is audit-logged (FR-035).
 import { query, withTransaction } from '../../config/db.js';
+import { NOTIFICATION_TYPE } from '../../config/constants.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { recordAudit } from '../../services/audit.js';
 import { recomputeApplicationStatus } from '../documents/document.service.js';
+import { messages, sendNotification } from '../notifications/notification.service.js';
 
 const UNIQUE_VIOLATION = '23505';
 const FOREIGN_KEY_VIOLATION = '23503';
@@ -32,6 +34,27 @@ function toChecklistItem(row) {
     isMandatory: row.is_mandatory,
     documentCount: row.document_count !== undefined ? Number(row.document_count) : undefined,
   };
+}
+
+/** FR-025: applicants in the category who now miss a newly mandatory document are told about it. */
+async function notifyNewMandatoryItem(item, client) {
+  const { rows } = await client.query(
+    `SELECT a.applicant_id FROM applications a
+      WHERE a.category_id = $1
+        AND NOT EXISTS (SELECT 1 FROM documents d
+                         WHERE d.application_id = a.id AND d.checklist_item_id = $2
+                           AND d.status IN ('PENDING', 'VERIFIED'))`,
+    [item.category_id, item.id],
+  );
+  await sendNotification(
+    {
+      recipientIds: rows.map((r) => r.applicant_id),
+      type: NOTIFICATION_TYPE.MISSING_DOCUMENT,
+      message: messages.newChecklistItem(item.document_type),
+      link: `/applicant/documents/${item.id}`,
+    },
+    client,
+  );
 }
 
 function duplicateError(err, field, message) {
@@ -137,6 +160,7 @@ export async function addChecklistItem(categoryId, { documentType, isMandatory }
     }
     // A new mandatory item can make complete applications incomplete again.
     await recomputeApplicationStatus({ categoryId }, client);
+    if (row.is_mandatory) await notifyNewMandatoryItem(row, client);
     await recordAudit(
       { actorId, action: 'CHECKLIST_ITEM_ADDED', entityType: 'checklist_item', entityId: row.id, details: { categoryId, documentType, isMandatory } },
       client,
@@ -170,6 +194,7 @@ export async function updateChecklistItem(id, changes, actorId) {
     }
     if (row.is_mandatory !== before.is_mandatory) {
       await recomputeApplicationStatus({ categoryId: row.category_id }, client);
+      if (row.is_mandatory) await notifyNewMandatoryItem(row, client);
     }
     await recordAudit(
       {

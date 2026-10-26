@@ -18,7 +18,7 @@ administrators manage checklists, users and reports. Requirements and UML models
 | 2 | Categories & checklists, applicant checklist and missing documents | Done |
 | 3 | Document upload, replace/resubmit, file versions, access-checked downloads | Done |
 | 4 | Pending-cases dashboard, document review, decisions with remarks, corrections | Done |
-| 5 | Notifications | — |
+| 5 | In-app notifications (status changes, remarks, missing documents, new submissions) | Done |
 | 6 | Administration & reports | — |
 
 ## Setup
@@ -30,7 +30,8 @@ Requires Node.js 20+.
    npm install
    ```
 2. Create `server/.env` from `server/.env.example` and fill in:
-   - `DATABASE_URL`: the Neon **pooled** connection string (`...-pooler...neon.tech/...?sslmode=require`)
+   - `DATABASE_URL`: the Neon connection string (`postgresql://...neon.tech/neondb?sslmode=require`); the
+     direct endpoint is fine. If your DNS refuses the `-pooler` host, use the direct one.
    - `JWT_SECRET`: a long random string (`node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`)
    - `SEED_PASSWORD`: the password every demo user gets
 3. Create the tables and load sample data:

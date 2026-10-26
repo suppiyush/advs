@@ -23,6 +23,11 @@ verificationRoutes.get('/applications/:id', validate(idParamSchema, 'params'), a
   res.json({ application: await verification.getApplicationForStaff(req.user, Number(req.params.id)) });
 });
 
+// FR-025: missing-documents reminder
+verificationRoutes.post('/applications/:id/remind', validate(idParamSchema, 'params'), async (req, res) => {
+  res.json({ reminder: await verification.remindMissingDocuments(req.user, Number(req.params.id)) });
+});
+
 // /api/documents/:id/decision and /correction
 export const decisionRoutes = Router();
 

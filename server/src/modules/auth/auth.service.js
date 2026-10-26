@@ -3,9 +3,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query, withTransaction } from '../../config/db.js';
 import { env } from '../../config/env.js';
-import { APPLICATION_STATUS, ROLES } from '../../config/constants.js';
+import { APPLICATION_STATUS, NOTIFICATION_TYPE, ROLES } from '../../config/constants.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { getSetting } from '../../services/settings.js';
+import { messages, sendNotification } from '../notifications/notification.service.js';
 
 const BCRYPT_ROUNDS = 10;
 // Compared against when the email is unknown, so both failure paths take similar time.
@@ -78,10 +79,26 @@ export async function registerApplicant({ name, email, phone, password, category
     }
 
     const { rows: seqRows } = await client.query(`SELECT nextval('application_number_seq') AS seq`);
+    const applicationNumber = formatApplicationNumber(seqRows[0].seq);
     await client.query(
       `INSERT INTO applications (application_number, applicant_id, category_id, overall_status)
        VALUES ($1, $2, $3, $4)`,
-      [formatApplicationNumber(seqRows[0].seq), user.id, categoryId, APPLICATION_STATUS.PENDING],
+      [applicationNumber, user.id, categoryId, APPLICATION_STATUS.PENDING],
+    );
+
+    // FR-025: tell the new applicant which documents are needed.
+    const { rows: items } = await client.query(
+      'SELECT document_type FROM checklist_items WHERE category_id = $1 AND is_mandatory ORDER BY id',
+      [categoryId],
+    );
+    await sendNotification(
+      {
+        recipientIds: user.id,
+        type: NOTIFICATION_TYPE.MISSING_DOCUMENT,
+        message: messages.welcome(applicationNumber, items.map((i) => i.document_type)),
+        link: '/applicant',
+      },
+      client,
     );
 
     return toPublicUser(user);

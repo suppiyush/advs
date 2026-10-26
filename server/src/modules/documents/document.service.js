@@ -2,10 +2,11 @@
 // upload (UC-005, UC-012) and access-checked document retrieval.
 import path from 'node:path';
 import { query, withTransaction } from '../../config/db.js';
-import { ROLES } from '../../config/constants.js';
+import { NOTIFICATION_TYPE, ROLES } from '../../config/constants.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { openFile, removeFile, saveFile, sniffMimeType } from '../../services/fileStore.js';
 import { getSetting } from '../../services/settings.js';
+import { messages, sendNotification, verifierIdsForCategory } from '../notifications/notification.service.js';
 
 const MIME_LABELS = { 'application/pdf': 'PDF', 'image/jpeg': 'JPG', 'image/png': 'PNG' };
 
@@ -97,8 +98,10 @@ export async function getUploadRules() {
 async function findApplicationRow(applicantId) {
   const { rows } = await query(
     `SELECT a.id, a.application_number, a.overall_status, a.submission_date,
-            c.id AS category_id, c.code AS category_code, c.name AS category_name
+            c.id AS category_id, c.code AS category_code, c.name AS category_name,
+            u.name AS applicant_name
        FROM applications a
+       JOIN users u ON u.id = a.applicant_id
        LEFT JOIN categories c ON c.id = a.category_id
       WHERE a.applicant_id = $1
       ORDER BY a.submission_date DESC
@@ -254,8 +257,20 @@ export async function uploadDocument(applicantId, { checklistItemId, confirmRepl
       // MissingDocumentList.recompute() and the application's overall status
       await recomputeApplicationStatus({ applicationId: application.id }, client);
 
+      const action = !existing ? 'UPLOADED' : existing.status === 'REJECTED' ? 'RESUBMITTED' : 'REPLACED';
+      // FR-027: Document.generate() -> the category's verifiers learn about the new submission.
+      await sendNotification(
+        {
+          recipientIds: await verifierIdsForCategory(application.category_id, client),
+          type: NOTIFICATION_TYPE.NEW_SUBMISSION,
+          message: messages.newSubmission(application.applicant_name, application.application_number, item.document_type, action),
+          link: `/cases/documents/${document.id}`,
+        },
+        client,
+      );
+
       return {
-        action: !existing ? 'UPLOADED' : existing.status === 'REJECTED' ? 'RESUBMITTED' : 'REPLACED',
+        action,
         documentType: item.document_type,
         documentId: document.id,
         version: document.current_version,

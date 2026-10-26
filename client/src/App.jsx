@@ -14,6 +14,7 @@ import CategoriesPage from './pages/admin/CategoriesPage.jsx';
 import CategoryDetailPage from './pages/admin/CategoryDetailPage.jsx';
 import Forbidden from './pages/shared/Forbidden.jsx';
 import NotFound from './pages/shared/NotFound.jsx';
+import NotificationsPage from './pages/shared/NotificationsPage.jsx';
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
@@ -50,6 +51,12 @@ export default function App() {
           <Route path="/admin" element={<UsersPage />} />
           <Route path="/admin/categories" element={<CategoriesPage />} />
           <Route path="/admin/categories/:id" element={<CategoryDetailPage />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Route>
       </Route>
 
