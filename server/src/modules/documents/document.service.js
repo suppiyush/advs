@@ -11,7 +11,7 @@ import { messages, sendNotification, verifierIdsForCategory } from '../notificat
 const MIME_LABELS = { 'application/pdf': 'PDF', 'image/jpeg': 'JPG', 'image/png': 'PNG' };
 
 /**
- * Recomputes applications.overall_status (plan §2.3 rule 6) for one application or for every
+ * Recomputes applications.overall_status for one application or for every
  * application in a category. Mandatory checklist items only:
  *   no mandatory items configured -> PENDING
  *   any rejected                  -> REJECTED
@@ -171,7 +171,7 @@ function cleanFileName(originalName, mimeType) {
 
 /**
  * UC-005 Upload Document / UC-012 Resubmit Document (FR-011-013, BR-001, BR-006, BR-007).
- * Replace/resubmit rules (plan §2.3 rule 1):
+ * Replace/resubmit rules:
  *   no document -> upload (version 1)
  *   PENDING     -> replace, only with confirmReplace (UC-005 alternative flow)
  *   REJECTED    -> resubmit, back to PENDING

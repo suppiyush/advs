@@ -66,7 +66,7 @@ export function createApp() {
 
   app.use('/api', notFoundHandler);
 
-  // Production: serve the built React app from the same origin (deployment notes, plan §9).
+  // Production: serve the built React app from the same origin.
   if (env.isProduction && fs.existsSync(path.join(clientDist, 'index.html'))) {
     app.use(express.static(clientDist, { index: false, maxAge: '1h' }));
     // Client-side routes (/applicant, /cases/...) all load the single-page app.

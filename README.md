@@ -3,21 +3,13 @@
 CS314 Software Development Lab prototype, Team T009 (LNMIIT Jaipur).
 
 A web platform where applicants upload admission documents, admission office staff verify them, and
-administrators manage checklists, users and reports. Requirements and UML models are in
-[`docs/documentation.pdf`](docs/documentation.pdf).
+administrators manage checklists, users and reports.
 
 **Stack:** Node.js + Express 5 (JavaScript, ES modules) · React 18 + Vite · PostgreSQL on Neon
 
 **Look:** "Corporate Blue" light design system — navy collapsible sidebar, white cards, #2563EB primary,
 Inter. Colours, radii and shadows are tokens at the top of `client/src/styles.css` (mirrored for charts in
 `client/src/theme.js`); sidebar modules and breadcrumb titles are configured in `client/src/navigation.js`.
-
-| Document | What it covers |
-|---|---|
-| [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Architecture, schema, API, and the decisions where the SRS and diagrams disagree |
-| [TRACEABILITY.md](docs/TRACEABILITY.md) | Every requirement, business rule and acceptance criterion → code → tests |
-| [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | A 15-minute walkthrough of the three detailed use cases and admin features |
-| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Running it as one service on Render with Neon |
 
 ## Status
 
@@ -30,7 +22,7 @@ Inter. Colours, radii and shadows are tokens at the top of `client/src/styles.cs
 | 4 | Pending-cases dashboard, document review, decisions with remarks, corrections | Done |
 | 5 | In-app notifications (status changes, remarks, missing documents, new submissions) | Done |
 | 6 | Users & roles, system settings, audit log, progress dashboard, reports | Done |
-| 7 | Login throttling, production serving, demo data, traceability, demo and deployment docs | Done |
+| 7 | Login throttling, production serving, demo data | Done |
 
 ## Setup
 
@@ -103,5 +95,4 @@ client/              React app (Vite)
   src/navigation.js  sidebar groups per role and page titles for breadcrumbs
   src/theme.js       design tokens used by charts
   src/pages/         auth, applicant, verifier (staff), admin, shared
-docs/                SRS, implementation plan, traceability, demo script, deployment notes
 ```
