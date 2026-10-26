@@ -7,6 +7,8 @@ import Register from './pages/auth/Register.jsx';
 import ApplicationDashboard from './pages/applicant/ApplicationDashboard.jsx';
 import VerifierDashboard from './pages/verifier/VerifierDashboard.jsx';
 import UsersPage from './pages/admin/UsersPage.jsx';
+import CategoriesPage from './pages/admin/CategoriesPage.jsx';
+import CategoryDetailPage from './pages/admin/CategoryDetailPage.jsx';
 import Forbidden from './pages/shared/Forbidden.jsx';
 import NotFound from './pages/shared/NotFound.jsx';
 
@@ -39,6 +41,8 @@ export default function App() {
       <Route element={<ProtectedRoute roles={['ADMINISTRATOR']} />}>
         <Route element={<Layout />}>
           <Route path="/admin" element={<UsersPage />} />
+          <Route path="/admin/categories" element={<CategoriesPage />} />
+          <Route path="/admin/categories/:id" element={<CategoryDetailPage />} />
         </Route>
       </Route>
 

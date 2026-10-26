@@ -7,7 +7,11 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import authRoutes from './modules/auth/auth.routes.js';
-import categoryRoutes from './modules/categories/category.routes.js';
+import {
+  adminCategoryRoutes,
+  adminChecklistItemRoutes,
+  publicCategoryRoutes,
+} from './modules/categories/category.routes.js';
 import applicationRoutes from './modules/documents/application.routes.js';
 import adminUserRoutes from './modules/admin/user.routes.js';
 
@@ -27,9 +31,11 @@ export function createApp() {
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
   app.use('/api/auth', authRoutes);
-  app.use('/api/categories', categoryRoutes);
+  app.use('/api/categories', publicCategoryRoutes);
   app.use('/api/applications', applicationRoutes);
   app.use('/api/admin/users', adminUserRoutes);
+  app.use('/api/admin/categories', adminCategoryRoutes);
+  app.use('/api/admin/checklist-items', adminChecklistItemRoutes);
 
   app.use('/api', notFoundHandler);
   app.use(errorHandler);

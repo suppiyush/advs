@@ -14,7 +14,7 @@ const NAV = {
   ],
   ADMINISTRATOR: [
     { to: '/admin', label: 'Users & Roles', end: true },
-    { label: 'Categories & Checklists', soon: true },
+    { to: '/admin/categories', label: 'Categories & Checklists' },
     { label: 'Reports & Dashboards', soon: true },
     { label: 'System Configuration', soon: true },
   ],

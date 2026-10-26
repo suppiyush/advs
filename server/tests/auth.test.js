@@ -1,31 +1,10 @@
 // FR-001-006, BR-006, UC-001/002. Creates only throwaway users (…@advs.test) and deletes them afterwards.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
 import { pool } from '../src/config/db.js';
-import { hashPassword } from '../src/modules/auth/auth.service.js';
-
-const app = createApp();
-const runId = `t${Date.now()}`;
-const emailFor = (name) => `${name}.${runId}@advs.test`;
-const PASSWORD = 'Test1234pass';
+import { PASSWORD, app, cleanupUsers, createUser, emailFor, loginAs } from './helpers.js';
 
 let categoryId;
-
-async function createUser(name, role, { isActive = true } = {}) {
-  const { rows } = await pool.query(
-    `INSERT INTO users (name, email, password_hash, role, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-    [name, emailFor(name), await hashPassword(PASSWORD), role, isActive],
-  );
-  return rows[0].id;
-}
-
-async function loginAs(name) {
-  const agent = request.agent(app);
-  const res = await agent.post('/api/auth/login').send({ email: emailFor(name), password: PASSWORD });
-  expect(res.status).toBe(200);
-  return agent;
-}
 
 beforeAll(async () => {
   const res = await request(app).get('/api/categories');
@@ -39,7 +18,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool.query(`DELETE FROM users WHERE email LIKE $1`, [`%.${runId}@advs.test`]);
+  await cleanupUsers();
   await pool.end();
 });
 

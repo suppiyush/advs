@@ -53,7 +53,7 @@ async function seed() {
       for (const documentType of [...COMMON_ITEMS, ...c.extra]) {
         await client.query(
           `INSERT INTO checklist_items (category_id, document_type, is_mandatory) VALUES ($1, $2, true)
-           ON CONFLICT (category_id, document_type) DO NOTHING`,
+           ON CONFLICT (category_id, lower(document_type)) DO NOTHING`,
           [rows[0].id, documentType],
         );
       }
