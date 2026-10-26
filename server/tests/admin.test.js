@@ -215,6 +215,24 @@ describe('dashboards and reports (FR-029-031, BR-010)', () => {
     expect(body.categories.map((c) => c.id)).toEqual(expect.arrayContaining([cat.id, otherCat.id]));
   });
 
+  it('includes a 14-day activity trend ending today, counting today’s upload and decision', async () => {
+    const { body } = await admin.get('/api/reports/progress');
+    expect(body.trend).toHaveLength(14);
+    const last = body.trend.at(-1);
+    expect(last.day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(last.uploads).toBeGreaterThanOrEqual(1);
+    expect(last.decisions).toBeGreaterThanOrEqual(1);
+  });
+
+  it('alerts about categories with applicants but no active verifier', async () => {
+    // otherCat has applicants (moved there earlier) and no verifier.
+    const { body } = await admin.get('/api/reports/progress');
+    const alert = body.alerts.find((a) => a.type === 'NO_VERIFIER' && a.categoryId === otherCat.id);
+    expect(alert).toBeDefined();
+    expect(alert.message).toMatch(/no active verifier/);
+    expect(body.alerts.some((a) => a.categoryId === cat.id)).toBe(false);
+  });
+
   it('gives a category-wise summary', async () => {
     const { body } = await admin.get('/api/reports/category-summary');
     const row = body.categories.find((c) => c.id === cat.id);

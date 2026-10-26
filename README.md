@@ -8,6 +8,10 @@ administrators manage checklists, users and reports. Requirements and UML models
 
 **Stack:** Node.js + Express 5 (JavaScript, ES modules) · React 18 + Vite · PostgreSQL on Neon
 
+**Look:** "Corporate Blue" light design system — navy collapsible sidebar, white cards, #2563EB primary,
+Inter. Colours, radii and shadows are tokens at the top of `client/src/styles.css` (mirrored for charts in
+`client/src/theme.js`); sidebar modules and breadcrumb titles are configured in `client/src/navigation.js`.
+
 | Document | What it covers |
 |---|---|
 | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Architecture, schema, API, and the decisions where the SRS and diagrams disagree |
@@ -94,7 +98,10 @@ server/              Express API
 client/              React app (Vite)
   src/api/           axios calls per area
   src/context/       AuthContext (current user and role)
-  src/components/    Layout, NotificationBell, StatusBadge, StatusBar, ConfirmDialog, ProtectedRoute
+  src/components/    Layout (sidebar, top bar), Breadcrumbs, NotificationBell, charts, StatusBadge,
+                     StatusBar, ConfirmDialog, AuthLayout, ProtectedRoute
+  src/navigation.js  sidebar groups per role and page titles for breadcrumbs
+  src/theme.js       design tokens used by charts
   src/pages/         auth, applicant, verifier (staff), admin, shared
 docs/                SRS, implementation plan, traceability, demo script, deployment notes
 ```

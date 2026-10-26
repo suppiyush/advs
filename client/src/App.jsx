@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -9,7 +10,8 @@ import UploadDocument from './pages/applicant/UploadDocument.jsx';
 import PendingCases from './pages/verifier/PendingCases.jsx';
 import ReviewDocument from './pages/verifier/ReviewDocument.jsx';
 import ApplicationView from './pages/verifier/ApplicationView.jsx';
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+// The dashboard is the only page using the chart library; load both only when an administrator opens it.
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'));
 import UsersPage from './pages/admin/UsersPage.jsx';
 import UserDetailPage from './pages/admin/UserDetailPage.jsx';
 import ReportsPage from './pages/admin/ReportsPage.jsx';
@@ -52,7 +54,14 @@ export default function App() {
 
       <Route element={<ProtectedRoute roles={['ADMINISTRATOR']} />}>
         <Route element={<Layout />}>
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+            path="/admin"
+            element={
+              <Suspense fallback={<div className="page-loading">Loading dashboard…</div>}>
+                <AdminDashboard />
+              </Suspense>
+            }
+          />
           <Route path="/admin/users" element={<UsersPage />} />
           <Route path="/admin/users/:id" element={<UserDetailPage />} />
           <Route path="/admin/reports" element={<ReportsPage />} />

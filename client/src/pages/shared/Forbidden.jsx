@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function Forbidden() {
   return (
-    <div className="auth-page">
+    <div className="center-page">
       <div className="card auth-card">
         <h1>Access denied</h1>
         <p className="muted">Your role does not have access to this page.</p>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { getApiError } from '../../api/client.js';
 import { ROLE_HOME, useAuth } from '../../context/AuthContext.jsx';
+import AuthLayout from '../../components/AuthLayout.jsx';
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -35,7 +36,7 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-page">
+    <AuthLayout>
       <form className="card auth-card" onSubmit={handleSubmit} noValidate>
         <h1>Log in to ADVS</h1>
         <p className="muted">Admission Document Verification System</p>
@@ -69,6 +70,6 @@ export default function Login() {
           New applicant? <Link to="/register">Create an account</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

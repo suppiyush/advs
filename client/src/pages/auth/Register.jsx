@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { fetchCategories } from '../../api/auth.js';
 import { getApiError } from '../../api/client.js';
 import { ROLE_HOME, useAuth } from '../../context/AuthContext.jsx';
+import AuthLayout from '../../components/AuthLayout.jsx';
 
 const EMPTY = { name: '', email: '', phone: '', password: '', confirmPassword: '', categoryId: '' };
 
@@ -52,7 +53,7 @@ export default function Register() {
   const fieldError = (name) => fields[name] && <small className="field-error">{fields[name]}</small>;
 
   return (
-    <div className="auth-page">
+    <AuthLayout>
       <form className="card auth-card" onSubmit={handleSubmit} noValidate>
         <h1>Applicant registration</h1>
         <p className="muted">Create an account to upload your admission documents.</p>
@@ -116,6 +117,6 @@ export default function Register() {
           Already registered? <Link to="/login">Log in</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

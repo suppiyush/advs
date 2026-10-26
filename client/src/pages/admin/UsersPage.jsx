@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { createUser, fetchUsers } from '../../api/admin.js';
 import { fetchAllCategories } from '../../api/categories.js';
 import { getApiError } from '../../api/client.js';
@@ -12,7 +12,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState(null);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({ search: '', role: '' });
+  // Links can pre-set the filters, e.g. /admin/users?role=VERIFIER from a dashboard alert.
+  const [params] = useSearchParams();
+  const [filters, setFilters] = useState({ search: params.get('search') ?? '', role: params.get('role') ?? '' });
   const [query, setQuery] = useState(filters);
 
   const [showForm, setShowForm] = useState(false);

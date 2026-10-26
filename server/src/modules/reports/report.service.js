@@ -3,15 +3,77 @@ import { query } from '../../config/db.js';
 
 const toCounts = (rows, key) => Object.fromEntries(rows.map((r) => [r[key], Number(r.count)]));
 
+const TREND_DAYS = 14;
+
+/** Daily registrations, uploads and decisions for the last 14 days, in Indian Standard Time. */
+async function getDailyTrend() {
+  const { rows } = await query(
+    `WITH days AS (
+       SELECT generate_series((now() AT TIME ZONE 'Asia/Kolkata')::date - ${TREND_DAYS - 1},
+                              (now() AT TIME ZONE 'Asia/Kolkata')::date, interval '1 day')::date AS day
+     )
+     SELECT to_char(d.day, 'YYYY-MM-DD') AS day,
+            (SELECT count(*) FROM applications a
+              WHERE (a.submission_date AT TIME ZONE 'Asia/Kolkata')::date = d.day) AS registrations,
+            (SELECT count(*) FROM document_files f
+              WHERE (f.uploaded_at AT TIME ZONE 'Asia/Kolkata')::date = d.day) AS uploads,
+            (SELECT count(*) FROM verification_records v
+              WHERE NOT v.is_correction AND (v.decision_date AT TIME ZONE 'Asia/Kolkata')::date = d.day) AS decisions
+       FROM days d
+      ORDER BY d.day`,
+  );
+  return rows.map((r) => ({
+    day: r.day,
+    registrations: Number(r.registrations),
+    uploads: Number(r.uploads),
+    decisions: Number(r.decisions),
+  }));
+}
+
+/** Things an administrator should act on. */
+async function getAlerts() {
+  const [{ rows: uncovered }, { rows: settings }] = await Promise.all([
+    query(
+      `SELECT c.id, c.name,
+              (SELECT count(*) FROM applications a WHERE a.category_id = c.id) AS applications,
+              (SELECT count(*) FROM documents d JOIN applications a ON a.id = d.application_id
+                WHERE a.category_id = c.id AND d.status = 'PENDING') AS pending
+         FROM categories c
+        WHERE c.is_active
+          AND NOT EXISTS (SELECT 1 FROM users u WHERE u.role = 'VERIFIER' AND u.is_active AND u.assigned_category_id = c.id)
+          AND EXISTS (SELECT 1 FROM applications a WHERE a.category_id = c.id)
+        ORDER BY c.name`,
+    ),
+    query(`SELECT value FROM system_settings WHERE key = 'registration_open'`),
+  ]);
+  const alerts = uncovered.map((c) => ({
+    type: 'NO_VERIFIER',
+    severity: Number(c.pending) > 0 ? 'critical' : 'warning',
+    categoryId: c.id,
+    message:
+      Number(c.pending) > 0
+        ? `${c.name}: ${c.pending} document(s) waiting, but no active verifier is assigned to this category.`
+        : `${c.name}: ${c.applications} applicant(s), but no active verifier is assigned yet.`,
+  }));
+  if (settings[0] && settings[0].value === false) {
+    alerts.push({ type: 'REGISTRATION_CLOSED', severity: 'info', message: 'Applicant registration is closed.' });
+  }
+  return alerts;
+}
+
 /** FR-029: aggregated application progress (the administrator's dashboard). */
 export async function generateSummary() {
+  const [trend, alerts] = await Promise.all([getDailyTrend(), getAlerts()]);
   const [apps, docs, recent] = await Promise.all([
     query('SELECT overall_status, count(*) FROM applications GROUP BY overall_status'),
     query('SELECT status, count(*) FROM documents GROUP BY status'),
     query(
       `SELECT l.action, l.created_at, l.details, u.name AS actor_name
          FROM audit_logs l LEFT JOIN users u ON u.id = l.actor_id
-        WHERE l.entity_type = 'document' ORDER BY l.created_at DESC LIMIT 10`,
+        WHERE l.entity_type = 'document'
+          -- only documents that still exist; the full audit log keeps everything
+          AND EXISTS (SELECT 1 FROM documents d WHERE d.id::text = l.entity_id)
+        ORDER BY l.created_at DESC LIMIT 10`,
     ),
   ]);
   const applications = toCounts(apps.rows, 'overall_status');
@@ -20,6 +82,8 @@ export async function generateSummary() {
     documents: toCounts(docs.rows, 'status'),
     categories: await getCategorySummary(),
     recentActivity: recent.rows.map((r) => ({ action: r.action, at: r.created_at, by: r.actor_name, details: r.details })),
+    trend,
+    alerts,
   };
 }
 

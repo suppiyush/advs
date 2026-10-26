@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { getApiError } from '../../api/client.js';
 import { fetchPendingCases, fetchStaffApplications } from '../../api/verification.js';
 import StatusBadge from '../../components/StatusBadge.jsx';
@@ -19,9 +19,17 @@ export default function PendingCases() {
   const location = useLocation();
   const [message] = useState(location.state?.message ?? null);
 
-  const [tab, setTab] = useState('documents');
-  const [search, setSearch] = useState('');
-  const [query, setQuery] = useState('');
+  // The top-bar search links here with ?tab=applicants&search=…
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState(params.get('tab') === 'applicants' ? 'applicants' : 'documents');
+  const [search, setSearch] = useState(params.get('search') ?? '');
+  const [query, setQuery] = useState((params.get('search') ?? '').trim());
+
+  // A new search from the top bar while this page is already open.
+  useEffect(() => {
+    if (params.get('tab') === 'applicants') setTab('applicants');
+    if (params.has('search')) setSearch(params.get('search'));
+  }, [params]);
   const [pending, setPending] = useState(null);
   const [applications, setApplications] = useState(null);
   const [error, setError] = useState(null);
@@ -133,7 +141,7 @@ export default function PendingCases() {
                     </td>
                     <td>
                       <Link to={`/cases/applications/${c.application.id}`}>{c.application.applicantName}</Link>
-                      <div className="muted small">{c.application.applicationNumber}</div>
+                      <div className="muted small nowrap">{c.application.applicationNumber}</div>
                     </td>
                     {isAdmin && <td>{c.category.name}</td>}
                     <td>
@@ -174,7 +182,7 @@ export default function PendingCases() {
                   <tr key={a.id}>
                     <td>
                       <strong>{a.applicantName}</strong>
-                      <div className="muted small">{a.applicationNumber}</div>
+                      <div className="muted small nowrap">{a.applicationNumber}</div>
                     </td>
                     {isAdmin && <td>{a.categoryName}</td>}
                     <td>
