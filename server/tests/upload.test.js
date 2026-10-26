@@ -11,20 +11,13 @@ import {
   files,
   loginAs,
   registerApplicant,
+  upload,
 } from './helpers.js';
 
 let category;
 let otherCategory;
 let applicant;
 let otherApplicant;
-
-function upload(agent, itemId, buffer, { name = 'scan.pdf', type = 'application/pdf', confirmReplace } = {}) {
-  let req = agent.post('/api/applications/me/documents');
-  if (itemId !== undefined) req = req.field('checklistItemId', String(itemId));
-  if (confirmReplace !== undefined) req = req.field('confirmReplace', String(confirmReplace));
-  if (buffer) req = req.attach('file', buffer, { filename: name, contentType: type });
-  return req;
-}
 
 const itemOf = (application, itemId) => application.checklist.find((i) => i.id === itemId);
 

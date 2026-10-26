@@ -28,6 +28,9 @@ router.get('/:id/file', validate(documentIdSchema, 'params'), validate(fileQuery
     // inline: PDFs and images open in the browser / the verifier's preview
     'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
     'Cache-Control': 'private, no-store',
+    // helmet's API-wide policy (object-src 'none') stops the browser's PDF viewer from rendering
+    // the file. For documents, only restrict who may embed them: our own pages.
+    'Content-Security-Policy': "frame-ancestors 'self'",
   });
   file.stream.on('error', (err) => res.destroy(err));
   file.stream.pipe(res);

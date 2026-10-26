@@ -12,7 +12,8 @@ import { uploadRoot } from '../src/services/fileStore.js';
 export const app = createApp();
 export const PASSWORD = 'Test1234pass';
 export const runId = `t${Date.now()}${Math.floor(Math.random() * 1000)}`;
-export const emailFor = (name) => `${name}.${runId}@advs.test`;
+// Emails are stored lower-case (login lowercases what the user types).
+export const emailFor = (name) => `${name}.${runId}@advs.test`.toLowerCase();
 
 export async function createUser(name, role, { isActive = true, assignedCategoryId = null } = {}) {
   const { rows } = await pool.query(
@@ -43,6 +44,15 @@ export async function createTestCategory(items) {
 
 export async function deleteTestCategory(code) {
   await pool.query('DELETE FROM categories WHERE code = $1', [code]);
+}
+
+/** Uploads a file for a checklist item as the given applicant agent. */
+export function upload(agent, itemId, buffer, { name = 'scan.pdf', type = 'application/pdf', confirmReplace } = {}) {
+  let req = agent.post('/api/applications/me/documents');
+  if (itemId !== undefined) req = req.field('checklistItemId', String(itemId));
+  if (confirmReplace !== undefined) req = req.field('confirmReplace', String(confirmReplace));
+  if (buffer) req = req.attach('file', buffer, { filename: name, contentType: type });
+  return req;
 }
 
 // Minimal valid files: real type is detected from these leading bytes.
@@ -78,5 +88,8 @@ export async function cleanupUsers() {
   for (const { id } of rows) {
     await fs.rm(path.join(uploadRoot, String(id)), { recursive: true, force: true });
   }
+  // Applicants first: that cascades to their documents and verification records, which otherwise
+  // keep the verifiers who made those decisions from being deleted.
+  await pool.query(`DELETE FROM users WHERE email LIKE $1 AND role = 'APPLICANT'`, [`%.${runId}@advs.test`]);
   await pool.query('DELETE FROM users WHERE email LIKE $1', [`%.${runId}@advs.test`]);
 }

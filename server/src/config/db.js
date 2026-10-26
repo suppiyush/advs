@@ -12,8 +12,12 @@ export const pool = new pg.Pool({
   // Neon requires TLS; sslmode in the URL also enables it, this covers URLs without it.
   ssl: isLocal || /sslmode=/.test(connectionString) ? undefined : { rejectUnauthorized: true },
   max: 10,
-  // Opening a TLS connection to Neon costs ~1.5 s; keep idle connections instead of the 10 s default.
-  idleTimeoutMillis: 5 * 60 * 1000,
+  // Opening a TLS connection to Neon costs ~1.5 s, so keep idle connections for a while (default
+  // 10 s), but for less than Neon's ~5 min auto-suspend, after which they would be dead.
+  idleTimeoutMillis: 60 * 1000,
+  // Give up on a connection attempt (e.g. while Neon wakes up) instead of hanging the request.
+  connectionTimeoutMillis: 15 * 1000,
+  keepAlive: true,
 });
 
 // Neon closes idle connections from its side. pg reports that on the pool; without a listener Node

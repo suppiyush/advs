@@ -6,7 +6,9 @@ import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ApplicationDashboard from './pages/applicant/ApplicationDashboard.jsx';
 import UploadDocument from './pages/applicant/UploadDocument.jsx';
-import VerifierDashboard from './pages/verifier/VerifierDashboard.jsx';
+import PendingCases from './pages/verifier/PendingCases.jsx';
+import ReviewDocument from './pages/verifier/ReviewDocument.jsx';
+import ApplicationView from './pages/verifier/ApplicationView.jsx';
 import UsersPage from './pages/admin/UsersPage.jsx';
 import CategoriesPage from './pages/admin/CategoriesPage.jsx';
 import CategoryDetailPage from './pages/admin/CategoryDetailPage.jsx';
@@ -34,9 +36,12 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route element={<ProtectedRoute roles={['VERIFIER']} />}>
+      {/* Verifiers record decisions; administrators see the same pages read-only and can correct decisions. */}
+      <Route element={<ProtectedRoute roles={['VERIFIER', 'ADMINISTRATOR']} />}>
         <Route element={<Layout />}>
-          <Route path="/verifier" element={<VerifierDashboard />} />
+          <Route path="/cases" element={<PendingCases />} />
+          <Route path="/cases/documents/:id" element={<ReviewDocument />} />
+          <Route path="/cases/applications/:id" element={<ApplicationView />} />
         </Route>
       </Route>
 

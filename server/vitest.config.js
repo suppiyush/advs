@@ -4,8 +4,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     setupFiles: ['./tests/setup.js'],
-    testTimeout: 20000,
-    hookTimeout: 30000,
+    // Generous limits: every query is a round trip to a remote Neon database.
+    testTimeout: 30000,
+    hookTimeout: 120000,
     // Tests share one database; run files one after another.
     fileParallelism: false,
   },

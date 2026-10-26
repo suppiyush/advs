@@ -17,7 +17,7 @@ administrators manage checklists, users and reports. Requirements and UML models
 | 1 | Registration, login/logout, role-based access, seed data | Done |
 | 2 | Categories & checklists, applicant checklist and missing documents | Done |
 | 3 | Document upload, replace/resubmit, file versions, access-checked downloads | Done |
-| 4 | Verification workflow & pending dashboard | — |
+| 4 | Pending-cases dashboard, document review, decisions with remarks, corrections | Done |
 | 5 | Notifications | — |
 | 6 | Administration & reports | — |
 

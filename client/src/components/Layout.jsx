@@ -9,12 +9,13 @@ const NAV = {
     { label: 'Notifications', soon: true },
   ],
   VERIFIER: [
-    { to: '/verifier', label: 'Pending Cases', end: true },
+    { to: '/cases', label: 'Pending Cases' },
     { label: 'Notifications', soon: true },
   ],
   ADMINISTRATOR: [
     { to: '/admin', label: 'Users & Roles', end: true },
     { to: '/admin/categories', label: 'Categories & Checklists' },
+    { to: '/cases', label: 'Verification' },
     { label: 'Reports & Dashboards', soon: true },
     { label: 'System Configuration', soon: true },
   ],

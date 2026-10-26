@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 export const ROLE_HOME = {
   APPLICANT: '/applicant',
-  VERIFIER: '/verifier',
+  VERIFIER: '/cases',
   ADMINISTRATOR: '/admin',
 };
 
