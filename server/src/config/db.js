@@ -16,6 +16,12 @@ export const pool = new pg.Pool({
   idleTimeoutMillis: 5 * 60 * 1000,
 });
 
+// Neon closes idle connections from its side. pg reports that on the pool; without a listener Node
+// treats it as an uncaught error and exits. The pool drops the broken client and opens a new one.
+pool.on('error', (err) => {
+  console.warn(`Idle database connection closed: ${err.code ?? err.message}`);
+});
+
 export function query(text, params) {
   return pool.query(text, params);
 }

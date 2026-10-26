@@ -5,6 +5,7 @@ import { ROLE_HOME, useAuth } from './context/AuthContext.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ApplicationDashboard from './pages/applicant/ApplicationDashboard.jsx';
+import UploadDocument from './pages/applicant/UploadDocument.jsx';
 import VerifierDashboard from './pages/verifier/VerifierDashboard.jsx';
 import UsersPage from './pages/admin/UsersPage.jsx';
 import CategoriesPage from './pages/admin/CategoriesPage.jsx';
@@ -29,6 +30,7 @@ export default function App() {
       <Route element={<ProtectedRoute roles={['APPLICANT']} />}>
         <Route element={<Layout />}>
           <Route path="/applicant" element={<ApplicationDashboard />} />
+          <Route path="/applicant/documents/:itemId" element={<UploadDocument />} />
         </Route>
       </Route>
 

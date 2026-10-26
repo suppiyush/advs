@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fetchMyApplication } from '../../api/applications.js';
+import { Link, useLocation } from 'react-router-dom';
+import { documentFileUrl, fetchMyApplication } from '../../api/applications.js';
 import { getApiError } from '../../api/client.js';
 import StatusBadge from '../../components/StatusBadge.jsx';
 
@@ -7,6 +8,14 @@ import StatusBadge from '../../components/StatusBadge.jsx';
 export default function ApplicationDashboard() {
   const [application, setApplication] = useState(null);
   const [error, setError] = useState(null);
+  // Success message handed over by the upload page (activity diagram: show success message).
+  const location = useLocation();
+  const [message] = useState(location.state?.message ?? null);
+
+  useEffect(() => {
+    // Don't show the message again after a reload.
+    if (location.state?.message) window.history.replaceState({}, '');
+  }, [location.state]);
 
   useEffect(() => {
     fetchMyApplication()
@@ -23,6 +32,12 @@ export default function ApplicationDashboard() {
   return (
     <section>
       <h1>My Application</h1>
+
+      {message && (
+        <div className="alert alert-success" role="status">
+          {message}
+        </div>
+      )}
 
       <div className="card">
         <div className="summary-grid">
@@ -92,7 +107,10 @@ export default function ApplicationDashboard() {
       <div className="card table-card">
         <div className="card-header">
           <h2>Document checklist</h2>
-          <span className="muted small">Accepted formats: PDF, JPG or PNG.</span>
+          <span className="muted small">
+            Accepted formats: {application.uploadRules.allowedFormats.join(', ')}, up to {application.uploadRules.maxUploadMb} MB
+            each.
+          </span>
         </div>
         {checklist.length === 0 ? (
           <div className="empty-state muted">The admission office has not set up the checklist for your category yet.</div>
@@ -113,7 +131,13 @@ export default function ApplicationDashboard() {
                 <tr key={item.id}>
                   <td>
                     <strong>{item.documentType}</strong>
-                    {item.document && <div className="muted small">{item.document.fileName}</div>}
+                    {item.document && (
+                      <div className="small">
+                        <a href={documentFileUrl(item.document.id)} target="_blank" rel="noreferrer">
+                          {item.document.fileName}
+                        </a>
+                      </div>
+                    )}
                   </td>
                   <td>{item.isMandatory ? 'Mandatory' : 'Optional'}</td>
                   <td>
@@ -124,9 +148,12 @@ export default function ApplicationDashboard() {
                   <td className="actions">
                     {/* Verified documents are final (Document state diagram). */}
                     {item.status !== 'VERIFIED' && (
-                      <button type="button" className="btn btn-secondary btn-small" disabled title="Uploads arrive in Increment 3">
+                      <Link
+                        to={`/applicant/documents/${item.id}`}
+                        className={`btn btn-small ${item.document && item.status !== 'REJECTED' ? 'btn-secondary' : 'btn-primary'}`}
+                      >
                         {item.status === 'REJECTED' ? 'Resubmit' : item.document ? 'Replace' : 'Upload'}
-                      </button>
+                      </Link>
                     )}
                   </td>
                 </tr>
