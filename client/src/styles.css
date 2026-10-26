@@ -176,19 +176,11 @@ code {
   flex-shrink: 0;
 }
 
-.brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
+.logo {
+  display: block;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.02em;
+  user-select: none;
 }
 
 .brand-text {
@@ -550,6 +542,39 @@ code {
   max-width: 1360px;
   padding: 1.5rem;
   min-width: 0;
+}
+
+/* Page rhythm: every page's top-level blocks sit exactly 1rem apart, whatever margins the
+   components carry elsewhere. Subtitles hug their heading; back links hug the heading below. */
+.content > section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.content > section > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.content > section > h1 + p.muted,
+.content > section > .page-heading + p.muted {
+  margin-top: -0.6rem;
+}
+
+.content > section > .back-link {
+  align-self: flex-start;
+  margin-bottom: -0.6rem;
+}
+
+.content > section > .page-heading h1 {
+  margin: 0;
+}
+
+/* Cards placed in grids: the grid's gap does the spacing */
+.two-column > .card,
+.two-column > div > .card:last-child {
+  margin-bottom: 0;
 }
 
 /* Mobile drawer backdrop */
@@ -1106,8 +1131,12 @@ code {
 
 /* ───────────────────────── Auth pages ───────────────────────── */
 
+/* Exactly one window tall: the page never scrolls. If a very short window can't fit the form,
+   only the form panel scrolls. */
 .auth-page {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   background: var(--bg);
@@ -1117,15 +1146,26 @@ code {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2.5rem;
+  gap: 1.5rem;
+  padding: clamp(1.5rem, 5vh, 2.75rem) clamp(1.5rem, 4vw, 3rem);
   background: var(--sidebar);
   color: var(--sidebar-text);
+  overflow: hidden;
 }
 
-.auth-aside .sidebar-brand {
-  padding: 0;
-  height: auto;
-  border: none;
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.auth-brand .brand-name {
+  font-size: 1.25rem;
+}
+
+.auth-brand .brand-sub {
+  font-size: 0.8rem;
+  white-space: normal;
 }
 
 .auth-aside h2 {
@@ -1166,9 +1206,23 @@ code {
 
 .auth-main {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
+  overflow-y: auto;
+  padding: clamp(1rem, 4vh, 2rem) 1.25rem;
+}
+
+/* margin: auto centres it, and unlike align-items: center never clips the top when it overflows */
+.auth-main-inner {
+  margin: auto;
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-main-inner:has(.auth-card-wide) {
+  max-width: 560px;
+}
+
+.auth-mobile-logo {
+  display: none;
 }
 
 .auth-card {
@@ -1177,6 +1231,59 @@ code {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.auth-main .auth-card {
+  max-width: none;
+  margin: 0;
+}
+
+.auth-card-wide {
+  gap: 0.85rem;
+}
+
+.auth-card-wide .form-row {
+  flex-wrap: nowrap;
+}
+
+.auth-card-wide .form-row > .field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.form-hint {
+  margin-top: -0.35rem;
+  font-size: 0.8rem;
+}
+
+/* Phones: keep pairs side by side (fits ~150px fields at 375px) and tighten spacing so the
+   form fits without scrolling; stack only on very narrow screens. */
+@media (max-width: 560px) {
+  .auth-main .auth-card {
+    padding: 1.1rem;
+  }
+  .auth-card-wide .form-row {
+    gap: 0.6rem;
+  }
+  .auth-card-wide {
+    gap: 0.7rem;
+  }
+  .auth-card-wide .field input,
+  .auth-card-wide .field select {
+    padding: 0.5rem 0.6rem;
+  }
+  .auth-card h1 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-card-wide .form-row {
+    flex-wrap: wrap;
+  }
+  .auth-card-wide .form-row > .field {
+    flex-basis: 100%;
+  }
 }
 
 .auth-card h1 {
@@ -2003,6 +2110,12 @@ code {
   }
   .auth-aside {
     display: none;
+  }
+  .auth-mobile-logo {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.85rem;
   }
 }
 

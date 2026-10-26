@@ -54,61 +54,69 @@ export default function Register() {
 
   return (
     <AuthLayout>
-      <form className="card auth-card" onSubmit={handleSubmit} noValidate>
+      <form className="card auth-card auth-card-wide" onSubmit={handleSubmit} noValidate>
         <h1>Applicant registration</h1>
         <p className="muted">Create an account to upload your admission documents.</p>
 
-        {error && (
+        {/* Field errors speak for themselves; the banner is for errors not tied to a field. */}
+        {error && !Object.values(fields).some(Boolean) && (
           <div className="alert alert-error" role="alert">
             {error}
           </div>
         )}
 
-        <label className="field">
-          <span>Full name</span>
-          <input name="name" value={form.name} onChange={update} autoComplete="name" />
-          {fieldError('name')}
-        </label>
-        <label className="field">
-          <span>Email</span>
-          <input type="email" name="email" value={form.email} onChange={update} autoComplete="email" />
-          {fieldError('email')}
-        </label>
-        <label className="field">
-          <span>
-            Phone <em className="muted">(optional)</em>
-          </span>
-          <input type="tel" name="phone" value={form.phone} onChange={update} autoComplete="tel" />
-          {fieldError('phone')}
-        </label>
-        <label className="field">
-          <span>Admission category</span>
-          <select name="categoryId" value={form.categoryId} onChange={update}>
-            <option value="">Select your category</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          {fieldError('categoryId')}
-        </label>
-        <label className="field">
-          <span>Password</span>
-          <input type="password" name="password" value={form.password} onChange={update} autoComplete="new-password" />
-          {fieldError('password') || <small className="muted">At least 8 characters, with a letter and a digit.</small>}
-        </label>
-        <label className="field">
-          <span>Confirm password</span>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={form.confirmPassword}
-            onChange={update}
-            autoComplete="new-password"
-          />
-          {fieldError('confirmPassword')}
-        </label>
+        <div className="form-row">
+          <label className="field">
+            <span>Full name</span>
+            <input name="name" value={form.name} onChange={update} autoComplete="name" />
+            {fieldError('name')}
+          </label>
+          <label className="field">
+            <span>Email</span>
+            <input type="email" name="email" value={form.email} onChange={update} autoComplete="email" />
+            {fieldError('email')}
+          </label>
+        </div>
+        <div className="form-row">
+          <label className="field">
+            <span>
+              Phone <em className="muted">(optional)</em>
+            </span>
+            <input type="tel" name="phone" value={form.phone} onChange={update} autoComplete="tel" />
+            {fieldError('phone')}
+          </label>
+          <label className="field">
+            <span>Admission category</span>
+            <select name="categoryId" value={form.categoryId} onChange={update}>
+              <option value="">Choose…</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {fieldError('categoryId')}
+          </label>
+        </div>
+        <div className="form-row">
+          <label className="field">
+            <span>Password</span>
+            <input type="password" name="password" value={form.password} onChange={update} autoComplete="new-password" />
+            {fieldError('password')}
+          </label>
+          <label className="field">
+            <span>Confirm password</span>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={update}
+              autoComplete="new-password"
+            />
+            {fieldError('confirmPassword')}
+          </label>
+        </div>
+        {!fields.password && <small className="muted form-hint">Password: at least 8 characters, with a letter and a digit.</small>}
 
         <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
           {submitting ? 'Creating account…' : 'Register'}

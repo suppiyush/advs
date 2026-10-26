@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { ROLE_HOME, ROLE_LABEL, useAuth } from '../context/AuthContext.jsx';
 import { NAV_GROUPS } from '../navigation.js';
 import Breadcrumbs from './Breadcrumbs.jsx';
+import Logo from './Logo.jsx';
 import NotificationBell from './NotificationBell.jsx';
 
 const COLLAPSE_KEY = 'advs.sidebarCollapsed';
@@ -142,8 +143,8 @@ export default function Layout() {
   return (
     <div className={`app-shell${collapsed ? ' collapsed' : ''}${drawerOpen ? ' drawer-open' : ''}`}>
       <aside className="sidebar" id="sidebar" aria-label="Main navigation">
-        <Link to={ROLE_HOME[user.role]} className="sidebar-brand" title="ADVS home">
-          <span className="brand-mark">ADVS</span>
+        <Link to={ROLE_HOME[user.role]} className="sidebar-brand" title="ADVS home" aria-label="ADVS home">
+          <Logo size={36} decorative />
           <span className="brand-text">
             <span className="brand-name">ADVS</span>
             <span className="brand-sub">Admission Document Verification</span>
