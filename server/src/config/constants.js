@@ -1,0 +1,29 @@
+// Enumerations from the ADVS class diagram (SRS v1.0, §39).
+
+export const ROLES = Object.freeze({
+  APPLICANT: 'APPLICANT',
+  VERIFIER: 'VERIFIER',
+  ADMINISTRATOR: 'ADMINISTRATOR',
+});
+
+export const APPLICATION_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  COMPLETED: 'COMPLETED',
+  REJECTED: 'REJECTED',
+});
+
+export const VERIFICATION_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+});
+
+export const NOTIFICATION_TYPE = Object.freeze({
+  STATUS_UPDATE: 'STATUS_UPDATE',
+  MISSING_DOCUMENT: 'MISSING_DOCUMENT',
+  REMARK_ADDED: 'REMARK_ADDED',
+  NEW_SUBMISSION: 'NEW_SUBMISSION',
+});
+
+export const AUTH_COOKIE = 'advs_token';
