@@ -59,6 +59,18 @@ describe('upload preconditions', () => {
     expect(res.body.error.code).toBe('INVALID_ITEM');
   });
 
+  it('blocks uploads while the application has no category (BR-006)', async () => {
+    const appId = (await otherApplicant.get('/api/applications/me')).body.application.id;
+    await pool.query('UPDATE applications SET category_id = NULL WHERE id = $1', [appId]);
+    try {
+      const res = await upload(otherApplicant, category.items.marksheet, files.pdf());
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('NO_CATEGORY');
+    } finally {
+      await pool.query('UPDATE applications SET category_id = $2 WHERE id = $1', [appId, category.id]);
+    }
+  });
+
   it('requires a checklist item and a file', async () => {
     expect((await upload(applicant, undefined, files.pdf())).status).toBe(400);
     const noFile = await upload(applicant, category.items.marksheet, null);

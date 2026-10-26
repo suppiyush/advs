@@ -4,10 +4,16 @@ CS314 Software Development Lab prototype, Team T009 (LNMIIT Jaipur).
 
 A web platform where applicants upload admission documents, admission office staff verify them, and
 administrators manage checklists, users and reports. Requirements and UML models are in
-[`docs/documentation.pdf`](docs/documentation.pdf); the build plan is in
-[`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
+[`docs/documentation.pdf`](docs/documentation.pdf).
 
 **Stack:** Node.js + Express 5 (JavaScript, ES modules) · React 18 + Vite · PostgreSQL on Neon
+
+| Document | What it covers |
+|---|---|
+| [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Architecture, schema, API, and the decisions where the SRS and diagrams disagree |
+| [TRACEABILITY.md](docs/TRACEABILITY.md) | Every requirement, business rule and acceptance criterion → code → tests |
+| [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | A 15-minute walkthrough of the three detailed use cases and admin features |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Running it as one service on Render with Neon |
 
 ## Status
 
@@ -20,6 +26,7 @@ administrators manage checklists, users and reports. Requirements and UML models
 | 4 | Pending-cases dashboard, document review, decisions with remarks, corrections | Done |
 | 5 | In-app notifications (status changes, remarks, missing documents, new submissions) | Done |
 | 6 | Users & roles, system settings, audit log, progress dashboard, reports | Done |
+| 7 | Login throttling, production serving, demo data, traceability, demo and deployment docs | Done |
 
 ## Setup
 
@@ -39,7 +46,11 @@ Requires Node.js 20+.
    npm run migrate
    npm run seed
    ```
-4. Start the API (port 5000) and the React app (port 5173) together:
+4. Optional — give the demo applicants documents in different states (safe to re-run; it resets them):
+   ```bash
+   npm run seed:demo
+   ```
+5. Start the API (port 5000) and the React app (port 5173) together:
    ```bash
    npm run dev
    ```
@@ -52,11 +63,11 @@ All use the password set in `SEED_PASSWORD`.
 | Role | Email | Notes |
 |---|---|---|
 | Administrator | admin@advs.local | |
-| Verifier | verifier.gen@advs.local | Category CAT-GEN |
-| Verifier | verifier.obc@advs.local | Category CAT-OBC |
-| Applicant | rahul.mehta@advs.local | General |
-| Applicant | priya.sharma@advs.local | OBC-NCL |
-| Applicant | arjun.verma@advs.local | EWS |
+| Verifier | verifier.gen@advs.local | Anita Singh, category General |
+| Verifier | verifier.obc@advs.local | Vikram Rao, category OBC-NCL |
+| Applicant | rahul.mehta@advs.local | General; after `seed:demo`: under review |
+| Applicant | priya.sharma@advs.local | OBC-NCL; after `seed:demo`: a document rejected |
+| Applicant | arjun.verma@advs.local | EWS; nothing uploaded |
 
 ## Tests
 
@@ -65,23 +76,25 @@ npm test
 ```
 
 API tests (vitest + supertest) need a migrated and seeded database. They use `TEST_DATABASE_URL` if it is
-set (recommended: a separate Neon branch), otherwise `DATABASE_URL`. They only create users with
-`@advs.test` emails and delete them afterwards.
+set (recommended: a separate Neon branch), otherwise `DATABASE_URL`. They only create throwaway data
+(`@advs.test` users, `CAT-T…` categories) and remove it afterwards; leftovers from an interrupted run are
+removed at the start of the next one. A full run takes about 6 minutes against a remote database.
 
 ## Project layout
 
 ```
-server/            Express API
-  migrations/      SQL schema, applied in order by `npm run migrate`
-  scripts/         migrate.js, seed.js
-  src/config/      env, database pool, enums from the class diagram
-  src/middleware/  auth (requireAuth / requireRole), validation, error handling
-  src/modules/     auth, categories, documents, admin (more per increment)
-  tests/
-client/            React app (Vite)
-  src/api/         axios calls
-  src/context/     AuthContext (current user and role)
-  src/components/  Layout, ProtectedRoute, StatusBadge
-  src/pages/       auth, applicant, verifier, admin, shared
-docs/              SRS / UML documentation and implementation plan
+server/              Express API
+  migrations/        SQL schema, applied in order by `npm run migrate`
+  scripts/           migrate.js, seed.js, seed-demo.js
+  src/config/        env, database pool, enums from the class diagram
+  src/middleware/    auth (requireAuth / requireRole), validation, uploads, rate limits, errors
+  src/services/      file store, audit log, settings
+  src/modules/       auth, categories, documents, verification, notifications, admin, reports
+  tests/             API tests, one file per area
+client/              React app (Vite)
+  src/api/           axios calls per area
+  src/context/       AuthContext (current user and role)
+  src/components/    Layout, NotificationBell, StatusBadge, StatusBar, ConfirmDialog, ProtectedRoute
+  src/pages/         auth, applicant, verifier (staff), admin, shared
+docs/                SRS, implementation plan, traceability, demo script, deployment notes
 ```

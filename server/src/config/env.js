@@ -10,6 +10,10 @@ function required(name) {
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
+if (nodeEnv === 'production' && (process.env.JWT_SECRET ?? '').length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters in production.');
+}
+
 export const env = {
   nodeEnv,
   isProduction: nodeEnv === 'production',

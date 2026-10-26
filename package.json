@@ -12,6 +12,7 @@
     "start": "npm run start -w server",
     "migrate": "npm run migrate -w server",
     "seed": "npm run seed -w server",
+    "seed:demo": "npm run seed:demo -w server",
     "test": "npm test -w server"
   },
   "devDependencies": {

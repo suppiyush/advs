@@ -93,6 +93,18 @@ describe('login and logout (FR-002-004)', () => {
     expect((await agent.get('/api/auth/me')).status).toBe(401);
   });
 
+  it('locks out an email after 10 failed logins from the same address, without affecting others', async () => {
+    const attempt = (email, password) => request(app).post('/api/auth/login').send({ email, password });
+    for (let i = 0; i < 10; i++) {
+      expect((await attempt(emailFor('throttled'), 'wrong-password1')).status).toBe(401);
+    }
+    const blocked = await attempt(emailFor('throttled'), 'wrong-password1');
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.error.code).toBe('TOO_MANY_ATTEMPTS');
+    // Other accounts can still log in.
+    expect((await attempt(emailFor('admin'), PASSWORD)).status).toBe(200);
+  });
+
   it('requires a session for protected routes (NFR-004)', async () => {
     expect((await request(app).get('/api/auth/me')).status).toBe(401);
   });
